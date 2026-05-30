@@ -18,6 +18,18 @@
 - Dockerfile: ruby:3.3-slim + Java JRE + AozoraEpub3
 - 127.0.0.1 のみに bind、VS Code ポート転送でアクセス
 - ホストの mihomo プロキシ (172.17.0.1:7890) を利用
+- 既存の小説データをバインドマウントで共有 (NarouTranslator/小説データ)
+- Windows の .narou 設定をインポートして引き継ぎ可能
+
+#### バグ修正 (2026-05-30)
+- entrypoint: .narousetting/ ディレクトリを narou init より先に作成し、
+  global_setting が /root/.narousetting/ に誤保存される問題を修正
+- aozoraepub3.rb: Narou.aozoraepub3_path が nil の場合に
+  File.dirname(nil) でクラッシュする問題に nil ガード追加
+- commandbase.rb: tag:指定で該当小説がない場合にタグ名を小説IDと
+  誤認する不具合を修正 (「modified は管理小説の中に存在しません」)
+- narou.library.js: WebSocket (port 33001) 非接続時のログ表示が
+  更新されない問題に対し、AJAXポーリングによるフォールバックを追加
 
 
 3.9.1: 2024-09-19

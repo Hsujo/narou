@@ -83,9 +83,11 @@ narou convert → text formatting → AozoraEpub3 Java process → EPUB/MOBI out
 
 - **Network mode**: `bridge` — required so the container can reach the host's mihomo proxy at `172.17.0.1:7890`
 - **Security**: ports mapped to `127.0.0.1` only in docker-compose.yml. The application internally binds `0.0.0.0` (required for Docker port forwarding), but UFW and Docker's port mapping restrict external access
-- **Volume**: `narou-data` named volume mounted at `/novel` — persists all downloaded novels and settings
-- **First-run**: `docker-entrypoint.sh` runs `narou init` then sets `already-server-boot: true` to skip the interactive confirmation
+- **Workspace**: `./workspace:/novel` bind mount — persists `.narou/` and `.narousetting/` configs
+- **Novel data**: `/home/xutao/repository/NarouTranslator/小説データ:/novel/小説データ` bind mount — shares existing novels downloaded from Windows
+- **First-run**: `docker-entrypoint.sh` checks `database.yaml` to detect imported config vs fresh install. `mkdir -p .narousetting` must run BEFORE `narou init`, otherwise narou falls back to `~/.narousetting/` and global settings are lost
 - **AozoraEpub3**: Copied into the image at `/opt/AozoraEpub3/` from the local NarouTranslator project during build
+- **WebSocket**: PushServer runs on port 33001 for real-time log streaming. If VS Code only forwards 33000, the JS Console falls back to AJAX polling every 2s
 
 ## Gem Dependency Notes
 
