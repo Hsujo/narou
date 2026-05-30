@@ -29,4 +29,4 @@ WORKDIR /novel
 EXPOSE 33000 33001
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["narou", "web", "-b", "127.0.0.1", "-p", "33000", "-n"]
+CMD ["narou", "web", "-p", "33000", "-n"]

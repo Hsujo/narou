@@ -16,9 +16,11 @@ services:
       NO_PROXY: "localhost,127.0.0.1,::1"
     volumes:
       - narou-data:/novel
+    network_mode: bridge
     restart: unless-stopped
     tty: true
     stdin_open: true
 
 volumes:
   narou-data:
+    external: false
