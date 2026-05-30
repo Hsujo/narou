@@ -15,12 +15,9 @@ services:
       https_proxy: "${HTTPS_PROXY}"
       NO_PROXY: "localhost,127.0.0.1,::1"
     volumes:
-      - narou-data:/novel
+      - ./workspace:/novel
+      - /home/xutao/repository/NarouTranslator/小説データ:/novel/小説データ
     network_mode: bridge
     restart: unless-stopped
     tty: true
     stdin_open: true
-
-volumes:
-  narou-data:
-    external: false

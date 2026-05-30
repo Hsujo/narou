@@ -32,6 +32,8 @@ tags
 trace_dump.txt
 .env
 AozoroEpub3/
+workspace/
+.narou.zip
 \#*\#
 archive
 commitversion
