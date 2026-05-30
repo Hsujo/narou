@@ -1,0 +1,24 @@
+services:
+  narou:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: narou-patched:latest
+    container_name: narou
+    ports:
+      - "127.0.0.1:33000:33000"
+      - "127.0.0.1:33001:33001"
+    environment:
+      HTTP_PROXY: "${HTTP_PROXY}"
+      HTTPS_PROXY: "${HTTPS_PROXY}"
+      http_proxy: "${HTTP_PROXY}"
+      https_proxy: "${HTTPS_PROXY}"
+      NO_PROXY: "localhost,127.0.0.1,::1"
+    volumes:
+      - narou-data:/novel
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+volumes:
+  narou-data:

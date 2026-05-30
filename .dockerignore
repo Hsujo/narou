@@ -1,0 +1,15 @@
+.git
+.gitignore
+.dockerignore
+spec/
+.circleci/
+ChangeLog.md
+README.md
+narou.bat
+Rakefile
+.rspec
+docker-compose.yml
+Dockerfile
+.env
+.env.example
+narou-*.gem

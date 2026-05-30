@@ -30,6 +30,7 @@ hotentry/
 replace.txt
 tags
 trace_dump.txt
+.env
 \#*\#
 archive
 commitversion
