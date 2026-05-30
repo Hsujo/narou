@@ -1,6 +1,25 @@
 更新履歴 - ChangeLog
 ====================
 
+3.9.1-patched: 2026-05-30
+-------------------------
+#### コミュニティPR適用（フォーク版）
+- 小説家になろう/ノクターン 作品情報 取得修正 #446 @etg-lt
+- カクヨム 構造変更対応 (tableOfContentsV2) #452 @kita77777
+- ハーメルン 目次取得 投稿日時タグ対応 #441 @etg-lt
+- 暁 目次取得 ページネーション対応 #442 @etg-lt
+- Erubis → Erubi 置換 (tilt 2.5+ 互換性) #444 @rogenobl
+- slice_size 指定時 分割部目次修正 #454 @ljoaruma
+- 横書き設定がテキストファイル変換時に反映されない問題を修正 #440 @rogenobl
+- AozoraEpub3 電書協対応版サポート #420 @happynow, #439 @rogenobl
+- Sinatra バージョン制約緩和 #408
+
+#### Dockerサポート追加
+- Dockerfile: ruby:3.3-slim + Java JRE + AozoraEpub3
+- 127.0.0.1 のみに bind、VS Code ポート転送でアクセス
+- ホストの mihomo プロキシ (172.17.0.1:7890) を利用
+
+
 3.9.1: 2024-09-19
 -----------------
 #### 修正内容
