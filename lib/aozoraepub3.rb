@@ -58,6 +58,7 @@ module AozoraEpub3
 
     # 資材アップデーターの取得
     updater = get_resouce_updater
+    return unless updater
 
     # ファイル更新情報のクリア
     updater.clear_log
@@ -82,8 +83,8 @@ module AozoraEpub3
   # Aozora資材アップデーターの取得
   #
   def self.get_resouce_updater(aozora_dir_path = nil)
-    aozora_dir_path ||= File.dirname(Narou.aozoraepub3_path)
-    if denshokyo_version?(aozora_dir_path)
+    aozora_dir_path ||= (path = Narou.aozoraepub3_path) ? File.dirname(path) : nil
+    if aozora_dir_path && denshokyo_version?(aozora_dir_path)
       AozoraResourceUpdaterDen.new(aozora_dir_path)
     else
       AozoraResourceUpdater.new(aozora_dir_path)
