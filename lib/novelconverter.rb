@@ -6,6 +6,7 @@
 
 require "fileutils"
 require "stringio"
+require_relative "aozoraepub3"
 require_relative "novelsetting"
 require_relative "inspector"
 require_relative "illustration"
@@ -50,7 +51,8 @@ class NovelConverter
       novel_converter = new(setting, options[:output_filename], options[:display_inspector])
       return {
         converted_txt_paths: novel_converter.convert_main,
-        use_dakuten_font: novel_converter.use_dakuten_font
+        use_dakuten_font: novel_converter.use_dakuten_font,
+        setting: setting,
       }
     end
     nil
@@ -81,39 +83,9 @@ class NovelConverter
     end
     {
       converted_txt_paths: novel_converter.convert_main(text),
-      use_dakuten_font: novel_converter.use_dakuten_font
+      use_dakuten_font: novel_converter.use_dakuten_font,
+      setting: setting,
     }
-  end
-
-  DAKUTEN_FROM = ["vertical_font_with_dakuten.css", "DMincho.ttf"]
-  DAKUTEN_TO = ["template/OPS/css_custom/vertical_font.css", "template/OPS/fonts/DMincho.ttf"]
-  DAKUTEN_ERB = [true, false]
-
-  def self.activate_dakuten_font_files
-    preset_dir = Narou.preset_dir
-    aozora_dir = File.dirname(Narou.aozoraepub3_path)
-    line_height = Narou.line_height
-
-    DAKUTEN_FROM.each_with_index do |name, i|
-      src = File.join(preset_dir, name)
-      dst = File.join(aozora_dir, DAKUTEN_TO[i])
-      if DAKUTEN_ERB[i]
-        Helper.erb_copy(src, dst, binding)
-      else
-        FileUtils.mkdir_p(File.dirname(dst))
-        FileUtils.copy(src, dst)
-      end
-    end
-  end
-
-  def self.inactivate_dakuten_font_files
-    preset_dir = Narou.preset_dir
-    aozora_dir = File.dirname(Narou.aozoraepub3_path)
-    path_normal_vertical_css = File.join(preset_dir, "vertical_font.css")
-    line_height = Narou.line_height
-
-    Helper.erb_copy(path_normal_vertical_css, File.join(aozora_dir, DAKUTEN_TO[0]), binding)
-    FileUtils.remove(File.join(aozora_dir, DAKUTEN_TO[1]))
   end
 
   #
@@ -127,6 +99,9 @@ class NovelConverter
   # 返り値：正常終了 :success、エラー終了 :error、AozoraEpub3が見つからなかった nil
   #
   def self.txt_to_epub(filename, dst_dir: nil, device: nil, verbose: false, yokogaki: false, use_dakuten_font: false, stream_io: $stdout2)
+    # AozoraEpub3のリソース更新
+    AozoraEpub3.update_resources(yokogaki, use_dakuten_font)
+
     abs_srcpath = File.expand_path(filename)
     src_dir = File.dirname(abs_srcpath)
 
@@ -179,7 +154,6 @@ class NovelConverter
     if Helper.os_windows?
       command = "cmd /c #{command}".encode(Encoding::Windows_31J)
     end
-    activate_dakuten_font_files if use_dakuten_font
     stream_io.print "AozoraEpub3でEPUBに変換しています"
     begin
       res = Helper::AsyncCommand.exec(command) do
@@ -187,7 +161,6 @@ class NovelConverter
       end
     ensure
       Dir.chdir(pwd)
-      inactivate_dakuten_font_files if use_dakuten_font
     end
 
     # AozoraEpub3はエラーだとしてもexitコードは0なので、
@@ -639,7 +612,7 @@ class NovelConverter
     end
     if is_hotentry == false && @setting.slice_size > 0 && subtitles.length > @setting.slice_size
       stream_io.puts "#{@setting.slice_size}話ごとに分割して変換します"
-      array_of_subtitles = subtitles.each_slice(@setting.slice_size).to_a
+      array_of_subtitles = slice_subtitles(subtitles, @setting.slice_size)
     else
       array_of_subtitles = [subtitles]
     end
@@ -686,6 +659,30 @@ class NovelConverter
   end
 
   #
+  # subtitleをslice_sizeごとに分割する
+  # 分割先頭のchapter/subchapterが空なら更新する
+  #
+  def slice_subtitles(subtitles, slice_size)
+    result = subtitles.each_slice(slice_size).to_a
+
+    last_chapter = ''
+    last_subchapter = ''
+
+    result.each do |sliced_subtitles|
+      sliced_subtitles[0]['chapter'] = last_chapter if ! last_chapter.empty?
+      sliced_subtitles[0]['subchapter'] = last_subchapter if ! last_subchapter.empty?
+
+      sliced_subtitles.each do |chapter|
+        last_chapter = chapter['chapter'] if ! chapter['chapter'].empty?
+        last_subchapter = chapter['subchapter'] if ! chapter['subchapter'].empty?
+      end
+    end
+
+    result
+
+  end
+
+  #
   # subtitle info から変換処理をする
   #
   def subtitles_to_sections(subtitles, html)
@@ -700,6 +697,8 @@ class NovelConverter
       section = load_novel_section(subinfo, section_save_dir)
       if section["chapter"].length > 0
         section["chapter"] = @converter.convert(section["chapter"], "chapter")
+      elsif ! subinfo["chapter"].empty?
+        section["chapter"] = @converter.convert(subinfo["chapter"], "chapter")
       end
 
       @inspector.subtitle = section["subtitle"]
